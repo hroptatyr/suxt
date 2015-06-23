@@ -151,6 +151,8 @@ proc1(xsltStylesheetPtr sty, const char *fn)
 	}
 
 	if ((ptx = xmlCreatePushParserCtxt(NULL, NULL, NULL, 0, fn)) == NULL) {
+		errno = 0, error("\
+Error: cannot instantiate XML push parser");
 		rc = -1;
 		goto out;
 	}
@@ -170,6 +172,8 @@ proc1(xsltStylesheetPtr sty, const char *fn)
 			xmlParseChunk(ptx, bp, tp - bp, 1);
 			doc = ptx->myDoc;
 			if (!ptx->wellFormed) {
+				errno = 0, error("\
+Error: cannot parse XML document");
 				rc = -1;
 				goto out;
 			}
