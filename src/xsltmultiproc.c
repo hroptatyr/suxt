@@ -156,20 +156,24 @@ Error: cannot instantiate XML push parser");
 		rc = -1;
 		goto out;
 	}
-	for (ssize_t nrd; (nrd = read(fd, buf, sizeof(buf))) > 0;) {
+	for (ssize_t nrd, i = 0; (nrd = read(fd, buf, sizeof(buf))) > 0; i++) {
 		const char *const ep = buf + nrd;
-		const char *bp = buf;
+		const char *bp = buf + (i == 0);
 
 		for (const char *tp;
 		     (tp = xmemmem(bp, ep - bp, xpi, strlenof(xpi))) != NULL;
 		     bp = tp + 1U) {
+			const char *cp;
 			xmlDocPtr doc;
 			xmlDocPtr xfd;
 
 			/* rewind bp */
 			bp -= (bp > buf);
+			/* also wind back any whitespace */
+			for (cp = tp;
+			     cp > buf && (unsigned char)cp[-1] <= ' '; cp--);
 			/* last one before the new <?xml?> PI */
-			xmlParseChunk(ptx, bp, tp - bp, 1);
+			xmlParseChunk(ptx, bp, cp - bp, 1);
 			doc = ptx->myDoc;
 			if (!ptx->wellFormed) {
 				errno = 0, error("\
