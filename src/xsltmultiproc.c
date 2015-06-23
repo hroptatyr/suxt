@@ -192,8 +192,6 @@ Error: cannot apply stylesheet");
 			}
 			/* reset the parser */
 			xmlCtxtResetPush(ptx, NULL, 0, NULL, NULL);
-			/* free the document */
-			xmlFreeDoc(doc);
 		}
 		/* rewind bp */
 		bp -= (bp > buf);
