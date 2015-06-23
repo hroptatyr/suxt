@@ -20,6 +20,21 @@ SUFFIXES =
 CLEANFILES += version.c
 EXTRA_DIST += version.c.in
 
+bin_PROGRAMS += xmlsplit
+xmlsplit_SOURCES = xmlsplit.c xmlsplit.yuck
+xmlsplit_CPPFLAGS = $(AM_CPPFLAGS)
+xmlsplit_LDFLAGS = $(AM_LDFLAGS)
+if HAVE_LIBXML2
+xmlsplit_CPPFLAGS += $(libxml2_CFLAGS)
+xmlsplit_LDFLAGS += $(libxml2_LIBS)
+else
+if HAVE_EXPAT
+xmlsplit_CPPFLAGS += $(expat_CFLAGS)
+xmlsplit_LDFLAGS += $(expat_LIBS)
+endif  HAVE_EXPAT
+endif  HAVE_LIBXML2
+BUILT_SOURCES += xmlsplit.yucc
+
 
 ## version rules
 version.c: version.c.in $(top_builddir)/.version
