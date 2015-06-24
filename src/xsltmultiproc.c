@@ -134,10 +134,59 @@ xmemmem(const char *hay, const size_t hayz, const char *ndl, const size_t ndlz)
 }
 
 
+static ssize_t
+proc_buf(xmlParserCtxtPtr ptx, const char *bp, const char *const ep)
+{
+/* process buffer BP and return the number of unconsumed bytes */
+	static const char pi[] = "<?xml version=\"1.0\"?>";
+	xsltStylesheetPtr sty = ptx->_private;
+
+	/* we always start scanning at offset 1 of bp as we are
+	 * looking for initiators not terminators and an empty
+	 * string before the very first initiator does not make sense */
+	for (const char *tp;
+	     (tp = xmemmem(bp + 1U, ep - (bp + 1U), pi, strlenof(pi))) != NULL;
+	     bp = tp) {
+		const char *cp;
+		xmlDocPtr doc;
+		xmlDocPtr xfd;
+
+		/* also wind back any whitespace */
+		for (cp = tp;
+		     cp > bp && (unsigned char)cp[-1] <= ' '; cp--);
+		/* so cp is the last beef byte before the new <?xml?> PI */
+		xmlParseChunk(ptx, bp, cp - bp, 1);
+		doc = ptx->myDoc;
+		if (!ptx->wellFormed) {
+			errno = 0, error("\
+Error: cannot parse XML document");
+			return -1;
+		}
+		/* apply style sheet */
+		if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
+			errno = 0, error("\
+Error: cannot apply stylesheet");
+			/* keep going though */
+			;
+		} else {
+			xsltSaveResultToFile(stdout, xfd, sty);
+			xmlFreeDoc(xfd);
+		}
+		/* reset the parser */
+		xmlCtxtResetPush(ptx, NULL, 0, NULL, NULL);
+	}
+
+	/* okidoke, no more *full* occurrences of PI
+	 * that means we feed the rest of the buffer that we can guarantee
+	 * not to contain any substrings of the PI to the XML parser and
+	 * hand control back to the buffer reader */
+	xmlParseChunk(ptx, bp, ep - strlenof(pi) - bp, 0);
+	return strlenof(pi);
+}
+
 static int
 proc1(xsltStylesheetPtr sty, const char *fn)
 {
-	static const char xpi[] = "<?xml version=\"1.0\"?>";
 	static char buf[16 * 4096U];
 	xmlParserCtxtPtr ptx;
 	int rc = 0;
@@ -156,47 +205,19 @@ Error: cannot instantiate XML push parser");
 		rc = -1;
 		goto out;
 	}
-	for (ssize_t nrd, i = 0; (nrd = read(fd, buf, sizeof(buf))) > 0; i++) {
+	/* hide the stylesheet in the parser context */
+	ptx->_private = sty;
+
+	for (ssize_t nrd, i = 0; (nrd = read(fd, buf + i, sizeof(buf))) > 0;) {
 		const char *const ep = buf + nrd;
-		const char *bp = buf + (i == 0);
+		const char *bp = buf;
 
-		for (const char *tp;
-		     (tp = xmemmem(bp, ep - bp, xpi, strlenof(xpi))) != NULL;
-		     bp = tp + 1U) {
-			const char *cp;
-			xmlDocPtr doc;
-			xmlDocPtr xfd;
-
-			/* rewind bp */
-			bp -= (bp > buf);
-			/* also wind back any whitespace */
-			for (cp = tp;
-			     cp > buf && (unsigned char)cp[-1] <= ' '; cp--);
-			/* last one before the new <?xml?> PI */
-			xmlParseChunk(ptx, bp, cp - bp, 1);
-			doc = ptx->myDoc;
-			if (!ptx->wellFormed) {
-				errno = 0, error("\
-Error: cannot parse XML document");
-				rc = -1;
-				goto out;
-			}
-			/* apply style sheet */
-			if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
-				errno = 0, error("\
-Error: cannot apply stylesheet");
-				rc = -1;
-			} else {
-				xsltSaveResultToFile(stdout, xfd, sty);
-				xmlFreeDoc(xfd);
-			}
-			/* reset the parser */
-			xmlCtxtResetPush(ptx, NULL, 0, NULL, NULL);
+		if (UNLIKELY((i = proc_buf(ptx, bp, ep)) < 0)) {
+			rc = -1;
+			goto out;
 		}
-		/* rewind bp */
-		bp -= (bp > buf);
-		/* just feed the rest for now */
-		xmlParseChunk(ptx, bp, ep - bp, 0);
+		/* move the unconsumed bytes to the beginning of buf */
+		memmove(buf, ep - i, i);
 	}
 
 out:
