@@ -134,12 +134,41 @@ xmemmem(const char *hay, const size_t hayz, const char *ndl, const size_t ndlz)
 }
 
 
+static int
+appl_sty(xmlParserCtxtPtr ptx)
+{
+	xsltStylesheetPtr sty = ptx->_private;
+	xmlDocPtr doc = ptx->myDoc;
+	xmlDocPtr xfd;
+
+	if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
+		errno = 0, error("\
+Error: cannot apply stylesheet");
+		return -1;
+	}
+	/* pump to stdout and clear resources */
+	xsltSaveResultToFile(stdout, xfd, sty);
+	xmlFreeDoc(xfd);
+	return 0;
+}
+
 static ssize_t
 proc_buf(xmlParserCtxtPtr ptx, const char *bp, const char *const ep)
 {
 /* process buffer BP and return the number of unconsumed bytes */
 	static const char pi[] = "<?xml version=\"1.0\"?>";
-	xsltStylesheetPtr sty = ptx->_private;
+
+	if (ep == NULL) {
+		xmlParseChunk(ptx, bp, strlenof(pi), 1);
+		if (!ptx->wellFormed) {
+			errno = 0, error("\
+Error: cannot parse XML document");
+			return -1;
+		}
+		/* apply style sheet, ignore return value */
+		(void)appl_sty(ptx);
+		return 0;
+	}
 
 	/* we always start scanning at offset 1 of bp as we are
 	 * looking for initiators not terminators and an empty
@@ -148,30 +177,19 @@ proc_buf(xmlParserCtxtPtr ptx, const char *bp, const char *const ep)
 	     (tp = xmemmem(bp + 1U, ep - (bp + 1U), pi, strlenof(pi))) != NULL;
 	     bp = tp) {
 		const char *cp;
-		xmlDocPtr doc;
-		xmlDocPtr xfd;
 
 		/* also wind back any whitespace */
 		for (cp = tp;
 		     cp > bp && (unsigned char)cp[-1] <= ' '; cp--);
 		/* so cp is the last beef byte before the new <?xml?> PI */
 		xmlParseChunk(ptx, bp, cp - bp, 1);
-		doc = ptx->myDoc;
 		if (!ptx->wellFormed) {
 			errno = 0, error("\
 Error: cannot parse XML document");
 			return -1;
 		}
-		/* apply style sheet */
-		if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
-			errno = 0, error("\
-Error: cannot apply stylesheet");
-			/* keep going though */
-			;
-		} else {
-			xsltSaveResultToFile(stdout, xfd, sty);
-			xmlFreeDoc(xfd);
-		}
+		/* apply style sheet, ignore return value */
+		(void)appl_sty(ptx);
 		/* reset the parser */
 		xmlCtxtResetPush(ptx, NULL, 0, NULL, NULL);
 	}
@@ -208,8 +226,9 @@ Error: cannot instantiate XML push parser");
 	/* hide the stylesheet in the parser context */
 	ptx->_private = sty;
 
-	for (ssize_t nrd, i = 0; (nrd = read(fd, buf + i, sizeof(buf))) > 0;) {
-		const char *const ep = buf + nrd;
+	for (ssize_t nrd, i = 0;
+	     (nrd = read(fd, buf + i, sizeof(buf) - i)) > 0;) {
+		const char *const ep = buf + i + nrd;
 		const char *bp = buf;
 
 		if (UNLIKELY((i = proc_buf(ptx, bp, ep)) < 0)) {
@@ -219,6 +238,9 @@ Error: cannot instantiate XML push parser");
 		/* move the unconsumed bytes to the beginning of buf */
 		memmove(buf, ep - i, i);
 	}
+	/* final processing of the last bytes,
+	 * let's hope they know how many bytes need processing */
+	proc_buf(ptx, buf, NULL);
 
 out:
 	if (!(fd < 0)) {
