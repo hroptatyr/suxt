@@ -35,6 +35,18 @@ endif  HAVE_EXPAT
 endif  HAVE_LIBXML2
 BUILT_SOURCES += xmlsplit.yucc
 
+if HAVE_LIBXSLT
+bin_PROGRAMS += xsltmultiproc
+xsltmultiproc_SOURCES = xsltmultiproc.c xsltmultiproc.yuck
+xsltmultiproc_CPPFLAGS = $(AM_CPPFLAGS)
+xsltmultiproc_LDFLAGS = $(AM_LDFLAGS)
+xsltmultiproc_CPPFLAGS += $(libxslt_CFLAGS)
+xsltmultiproc_LDFLAGS += $(libxslt_LIBS)
+xsltmultiproc_CPPFLAGS += $(libexslt_CFLAGS)
+xsltmultiproc_LDFLAGS += $(libexslt_LIBS)
+BUILT_SOURCES += xsltmultiproc.yucc
+endif  HAVE_LIBXSLT
+
 
 ## version rules
 version.c: version.c.in $(top_builddir)/.version
