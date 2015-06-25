@@ -135,13 +135,33 @@ xmemmem(const char *hay, const size_t hayz, const char *ndl, const size_t ndlz)
 
 
 static int
+push_buf(xmlParserCtxtPtr ptx, const char *buf, size_t len, int lastp)
+{
+/* comb out \f */
+	const char *bp = buf;
+	const char *const ep = buf + len;
+
+	for (const char *tp;
+	     bp < ep && (tp = memchr(bp, '\f', ep - bp)) != NULL;
+	     bp = tp + 1U) {
+		xmlParseChunk(ptx, bp, tp - bp, 0);
+	}
+	/* and pass on the rest */
+	return xmlParseChunk(ptx, bp, ep - bp, lastp);
+}
+
+static int
 appl_sty(xmlParserCtxtPtr ptx)
 {
 	xsltStylesheetPtr sty = ptx->_private;
 	xmlDocPtr doc = ptx->myDoc;
 	xmlDocPtr xfd;
 
-	if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
+	if (!ptx->wellFormed) {
+		errno = 0, error("\
+Error: cannot parse XML document");
+		return -1;
+	} else if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
 		errno = 0, error("\
 Error: cannot apply stylesheet");
 		return -1;
@@ -159,7 +179,7 @@ proc_buf(xmlParserCtxtPtr ptx, const char *bp, const char *const ep)
 	static const char pi[] = "<?xml version=\"1.0\"?>";
 
 	if (ep == NULL) {
-		xmlParseChunk(ptx, bp, strlenof(pi), 1);
+		push_buf(ptx, bp, strlenof(pi), 1);
 		if (!ptx->wellFormed) {
 			errno = 0, error("\
 Error: cannot parse XML document");
@@ -176,29 +196,17 @@ Error: cannot parse XML document");
 	for (const char *tp;
 	     (tp = xmemmem(bp + 1U, ep - (bp + 1U), pi, strlenof(pi))) != NULL;
 	     bp = tp) {
-		const char *cp;
-
-		/* also wind back any whitespace */
-		for (cp = tp;
-		     cp > bp && (unsigned char)cp[-1] <= ' '; cp--);
-		/* so cp is the last beef byte before the new <?xml?> PI */
-		xmlParseChunk(ptx, bp, cp - bp, 1);
-		if (!ptx->wellFormed) {
-			errno = 0, error("\
-Error: cannot parse XML document");
-			return -1;
-		}
+		push_buf(ptx, bp, tp - bp, 1);
 		/* apply style sheet, ignore return value */
 		(void)appl_sty(ptx);
 		/* reset the parser */
 		xmlCtxtResetPush(ptx, NULL, 0, NULL, NULL);
 	}
-
 	/* okidoke, no more *full* occurrences of PI
 	 * that means we feed the rest of the buffer that we can guarantee
 	 * not to contain any substrings of the PI to the XML parser and
 	 * hand control back to the buffer reader */
-	xmlParseChunk(ptx, bp, ep - strlenof(pi) - bp, 0);
+	push_buf(ptx, bp, ep - strlenof(pi) - bp, 0);
 	return strlenof(pi);
 }
 
