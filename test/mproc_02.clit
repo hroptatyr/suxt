@@ -1,0 +1,6 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+$ xmlsplit --by 'SecDef' < "${srcdir}/ex_fpr.xml" | xsltmultiproc "${srcdir}/ex_fpr.xsl"
+CBT	BCX	2015-07-14
+CBT	BCX	2015-08-14
+$

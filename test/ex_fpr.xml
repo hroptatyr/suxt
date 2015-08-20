@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FIXML>
+<Batch>
+<SecDef RptID="1" BizDt="2015-05-22"><Instrmt Sym="BCX" ID="31" Desc="SOYBEAN CRUSH COMBO" SecTyp="MLEG" Src="H" SubTyp="HZ1" MMY="201507" MatDt="2015-07-14" Exch="CBT" ListMeth="0" ValMeth="FUT" ProdCmplx="AG" Status="1" MinPxIncr="0.125" PxQteCcy="USD"><AID AltID="31 201507" AltIDSrc="100"/><AID AltID="31 201507" AltIDSrc="H"/><AID AltID="BCXN5" AltIDSrc="101"/><Evnt EventTyp="5" Dt="2014-01-14"/><Evnt EventTyp="7" Dt="2015-07-14"/></Instrmt></SecDef>
+<SecDef RptID="2" BizDt="2015-05-22"><Instrmt Sym="BCX" ID="31" Desc="SOYBEAN CRUSH COMBO" SecTyp="MLEG" Src="H" SubTyp="HZ1" MMY="201508" MatDt="2015-08-14" Exch="CBT" ListMeth="0" ValMeth="FUT" ProdCmplx="AG" Status="1" MinPxIncr="0.125" PxQteCcy="USD"><AID AltID="31 201508" AltIDSrc="100"/><AID AltID="BCXQ5" AltIDSrc="101"/><AID AltID="31 201508" AltIDSrc="H"/><Evnt EventTyp="5" Dt="2014-03-14"/><Evnt EventTyp="7" Dt="2015-08-14"/></Instrmt></SecDef>
+</Batch>
+</FIXML>
