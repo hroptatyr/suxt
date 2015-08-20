@@ -76,6 +76,19 @@ error(const char *fmt, ...)
 	return errno;
 }
 
+static int
+xopen(const char *fn, int fl)
+{
+	int fd;
+
+	if (fn == NULL || *fn == '-' && fn[1U] == '\0') {
+		fd = STDIN_FILENO;
+	} else {
+		fd = open(fn, fl);
+	}
+	return fd;
+}
+
 static char*
 xmemmem(const char *hay, const size_t hayz, const char *ndl, const size_t ndlz)
 {
@@ -218,9 +231,7 @@ proc1(xsltStylesheetPtr sty, const char *fn)
 	int rc = 0;
 	int fd;
 
-	if (fn == NULL || *fn == '-' && fn[1U] == '\0') {
-		fd = STDIN_FILENO;
-	} else if ((fd = open(fn, O_RDONLY)) < 0) {
+	if ((fd = xopen(fn, O_RDONLY)) < 0) {
 		rc = -1;
 		goto out;
 	}
@@ -250,6 +261,8 @@ Error: cannot instantiate XML push parser");
 	 * let's hope they know how many bytes need processing */
 	proc_buf(ptx, buf, NULL);
 
+	/* deinitialise */
+	xmlFreeParserCtxt(ptx);
 out:
 	if (!(fd < 0)) {
 		close(fd);
