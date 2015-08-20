@@ -1,15 +1,16 @@
 language: c
 
+sudo: false
+
 compiler:
   - gcc
   - clang
 
-before_install:
-  - sudo apt-get -qq update
-
-install:
-  - sudo apt-get install -qq libxml2-dev
-  - sudo apt-get install -qq libxslt1-dev
+addons:
+  apt:
+    packages:
+      - libxml2-dev
+      - libxslt1-dev
 
 before_script:
   - autoreconf -vfi
