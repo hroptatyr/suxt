@@ -37,6 +37,8 @@ AX_CHECK_YUCK
 AX_YUCK_SCMVER([version.mk])
 AC_CONFIG_LINKS([GNUmakefile:GNUmakefile])
 
+## also check for clitoris
+AX_CHECK_CLITORIS
 
 ## libxml2 family
 PKG_CHECK_MODULES([libxml2], [libxml-2.0 >= 2.0], [have_libxml2="yes"], [have_libxml2="no"])
