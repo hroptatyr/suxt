@@ -584,7 +584,7 @@ Error: parameter --by is not optional in this version");
 
 #if defined HAVE_LIBXML_PARSER_H || defined HAVE_EXPAT_H
 	with (size_t i = 0U) {
-		if (!argi->args) {
+		if (!argi->nargs) {
 			goto one_off;
 		}
 		for (; i < argi->nargs; i++) {
