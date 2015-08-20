@@ -261,6 +261,8 @@ Error: cannot instantiate XML push parser");
 	 * let's hope they know how many bytes need processing */
 	proc_buf(ptx, buf, NULL);
 
+	/* deinitialise */
+	xmlFreeParserCtxt(ptx);
 out:
 	if (!(fd < 0)) {
 		close(fd);
