@@ -27,12 +27,12 @@ xmlsplit_LDFLAGS = $(AM_LDFLAGS)
 if HAVE_LIBXML2
 xmlsplit_CPPFLAGS += $(libxml2_CFLAGS)
 xmlsplit_LDFLAGS += $(libxml2_LIBS)
-else
+else  !HAVE_LIBXML2
 if HAVE_EXPAT
 xmlsplit_CPPFLAGS += $(expat_CFLAGS)
 xmlsplit_LDFLAGS += $(expat_LIBS)
 endif  HAVE_EXPAT
-endif  HAVE_LIBXML2
+endif  !HAVE_LIBXML2
 BUILT_SOURCES += xmlsplit.yucc
 
 if HAVE_LIBXSLT
