@@ -19,6 +19,7 @@ SUFFIXES =
 
 CLEANFILES += version.c
 EXTRA_DIST += version.c.in
+EXTRA_DIST += nifty.h
 
 bin_PROGRAMS += xmlsplit
 xmlsplit_SOURCES = xmlsplit.c xmlsplit.yuck
