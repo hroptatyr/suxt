@@ -16,11 +16,20 @@ TESTS =
 NOTESTS =
 TEST_EXTENSIONS =
 BUILT_SOURCES =
+check_PROGRAMS =
 CLEANFILES = $(check_PROGRAMS)
 
 ## summon our helper
 include clitoris.am
 AM_CLIT_LOG_FLAGS = -v --builddir "$(top_builddir)/src"
 TESTS_ENVIRONMENT = root="$(top_srcdir)"
+
+
+TESTS += split_01.clit
+TESTS += split_02.clit
+TESTS += mproc_01.clit
+TESTS += mproc_02.clit
+EXTRA_DIST += ex_fpr.xml
+EXTRA_DIST += ex_fpr.xsl
 
 ## Makefile.am ends here
