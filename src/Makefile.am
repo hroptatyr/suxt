@@ -25,13 +25,14 @@ bin_PROGRAMS += xmlsplit
 xmlsplit_SOURCES = xmlsplit.c xmlsplit.yuck
 xmlsplit_CPPFLAGS = $(AM_CPPFLAGS)
 xmlsplit_LDFLAGS = $(AM_LDFLAGS)
+xmlsplit_LDADD =
 if HAVE_LIBXML2
 xmlsplit_CPPFLAGS += $(libxml2_CFLAGS)
-xmlsplit_LDFLAGS += $(libxml2_LIBS)
+xmlsplit_LDADD += $(libxml2_LIBS)
 else  !HAVE_LIBXML2
 if HAVE_EXPAT
 xmlsplit_CPPFLAGS += $(expat_CFLAGS)
-xmlsplit_LDFLAGS += $(expat_LIBS)
+xmlsplit_LDADD += $(expat_LIBS)
 endif  HAVE_EXPAT
 endif  !HAVE_LIBXML2
 BUILT_SOURCES += xmlsplit.yucc
@@ -41,12 +42,13 @@ bin_PROGRAMS += xsltmultiproc
 xsltmultiproc_SOURCES = xsltmultiproc.c xsltmultiproc.yuck
 xsltmultiproc_CPPFLAGS = $(AM_CPPFLAGS)
 xsltmultiproc_LDFLAGS = $(AM_LDFLAGS)
+xsltmultiproc_LDADD =
 xsltmultiproc_CPPFLAGS += $(libxml2_CFLAGS)
-xsltmultiproc_LDFLAGS += $(libxml2_LIBS)
+xsltmultiproc_LDADD += $(libxml2_LIBS)
 xsltmultiproc_CPPFLAGS += $(libxslt_CFLAGS)
-xsltmultiproc_LDFLAGS += $(libxslt_LIBS)
+xsltmultiproc_LDADD += $(libxslt_LIBS)
 xsltmultiproc_CPPFLAGS += $(libexslt_CFLAGS)
-xsltmultiproc_LDFLAGS += $(libexslt_LIBS)
+xsltmultiproc_LDADD += $(libexslt_LIBS)
 BUILT_SOURCES += xsltmultiproc.yucc
 endif  HAVE_LIBXSLT
 
