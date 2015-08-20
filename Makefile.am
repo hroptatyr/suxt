@@ -19,6 +19,8 @@ DISTCLEANFILES += version.mk
 DISTCLEANFILES += .version
 EXTRA_DIST += version.mk.in
 
+doc_DATA += README.md
+
 ## make sure .version is read-only in the dist
 dist-hook:
 	chmod ugo-w $(distdir)/.version
