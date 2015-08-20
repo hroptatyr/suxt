@@ -115,6 +115,19 @@ error(const char *fmt, ...)
 	return errno;
 }
 
+static int
+xopen(const char *fn, int fl)
+{
+	int fd;
+
+	if (fn == NULL || *fn == '-' && fn[1U] == '\0') {
+		fd = STDIN_FILENO;
+	} else {
+		fd = open(fn, fl);
+	}
+	return fd;
+}
+
 
 /* parsing guts */
 static const char xmlns[] = "xmlns";
@@ -461,9 +474,7 @@ rd1(const char *fn, struct opt_s opt)
 	int rc = 0;
 	int fd;
 
-	if (fn == NULL || *fn == '-' && fn[1U] == '\0') {
-		fd = STDIN_FILENO;
-	} else if ((fd = open(fn, O_RDONLY)) < 0) {
+	if ((fd = xopen(fn, O_RDONLY)) < 0) {
 		rc = -1;
 		goto out;
 	} else if ((ptx = xmlCreatePushParserCtxt(
@@ -500,9 +511,7 @@ rd1(const char *fn, struct opt_s opt)
 	int rc = 0;
 	int fd;
 
-	if (fn == NULL || *fn == '-' && fn[1U] == '\0') {
-		fd = STDIN_FILENO;
-	} else if ((fd = open(fn, O_RDONLY)) < 0) {
+	if ((fd = open(fn, O_RDONLY)) < 0) {
 		rc = -1;
 		goto out;
 	} else if ((hdl = XML_ParserCreate(NULL)) == NULL) {
@@ -575,7 +584,7 @@ Error: parameter --by is not optional in this version");
 
 #if defined HAVE_LIBXML_PARSER_H || defined HAVE_EXPAT_H
 	with (size_t i = 0U) {
-		if (!argi->args) {
+		if (!argi->nargs) {
 			goto one_off;
 		}
 		for (; i < argi->nargs; i++) {
