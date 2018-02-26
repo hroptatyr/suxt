@@ -48,7 +48,7 @@ xsltmultiproc_LDADD += $(libxml2_LIBS)
 xsltmultiproc_CPPFLAGS += $(libxslt_CFLAGS)
 xsltmultiproc_LDADD += $(libxslt_LIBS)
 xsltmultiproc_CPPFLAGS += $(libexslt_CFLAGS)
-xsltmultiproc_LDADD += $(libexslt_LIBS)
+xsltmultiproc_LDADD += -lexslt
 BUILT_SOURCES += xsltmultiproc.yucc
 endif  HAVE_LIBXSLT
 
