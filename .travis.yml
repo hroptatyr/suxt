@@ -25,7 +25,18 @@ branches:
   only:
     - master
     - next
+    - /^v\d+\..*/
 
 notifications:
   email:
     - devel@fresse.org
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "lSH39u1Dr64rFh61p3tWZsRfNgINgUj1Z2BVc9P+ryHvi6frJ3UqES/0zgOHlbXHfPhqtDKsrWA6kTe0rj0jaYVonzvFwZeEKLM3ktdA3LXUKASdBPN3617c7bwmaPBkbtU4bfF5594XyaBLJ52xCBejAnELzt1tLH82Ay9FoD2U5ks6nkrgZfjbGjOj0h7XMFU6uJ3zPNRyFw3WDRQM8WDM12FUGZ3XjAHMMwIB6CllzWFFSCFTL6FqOTl0W36YGaEe6vM7kB6NVmvKTqUIjeOa/59dMjEgBKDUF0/s0HMkL2wy8HS/MD5ePF6vIAdOJ2D92l8kZnVpi7z85lBi5Yys7jEpyJKF14tE8Q29kbFwHYeUeWf6dvVzqEYVFmofJIbdNRG4jDvZMHJXjjaKZ7iWgdvOf/4lQQWIOwta3kPgsvww4BdaDpSWL/t5N45cCzRmVtEOFDu/kSIslcMYIFVb7fd304X3NuLfWrmPUF2gQqbSYi9cSortoYXCQ/ofFxRlKWovPgTgW4zUB1qLHTFcynUgHMQHTJNvJo0blUmHrs2RgUcPs7Vd3hm0pDglCwJi9jWqAqwwL2JaQncVxuPxM1ED1GdVXVwbde0240xQ8Hgzlnr4Z0XElHjqDIh80QVIAZz+aU8PshI4AXH9Eix9Yl7D+rBJoU+0vJnY4j0="
+  file_glob: true
+  file: suxt-*.tar.xz
+  skip_cleanup: true
+  on:
+    tags: true
