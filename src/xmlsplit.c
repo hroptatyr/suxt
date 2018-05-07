@@ -1,6 +1,6 @@
 /*** xmlsplit.c -- XML file chunker
  *
- * Copyright (C) 2015 Sebastian Freundt
+ * Copyright (C) 2018 Sebastian Freundt
  *
  * Author:  Sebastian Freundt <freundt@ga-group.nl>
  *
