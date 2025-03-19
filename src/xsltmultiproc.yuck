@@ -2,3 +2,6 @@ Usage: xsltstream STYLESHEET [FILE]...
 
 Apply STYLESHEET to a stream of XML documents.
 A document begins with the <?xml?> processing instruction.
+
+   --param=NAME+VALUE...  pass a NAME=VALUE pair,
+                          VALUE is an XPath expression

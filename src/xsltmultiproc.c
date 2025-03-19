@@ -147,6 +147,9 @@ xmemmem(const char *hay, const size_t hayz, const char *ndl, const size_t ndlz)
 }
 
 
+static const char *params[64U];
+static size_t nparams;
+
 static int
 push_buf(xmlParserCtxtPtr ptx, const char *buf, size_t len, int lastp)
 {
@@ -174,7 +177,7 @@ appl_sty(xmlParserCtxtPtr ptx)
 		errno = 0, error("\
 Error: cannot parse XML document");
 		return -1;
-	} else if ((xfd = xsltApplyStylesheet(sty, doc, NULL)) == NULL) {
+	} else if ((xfd = xsltApplyStylesheet(sty, doc, params)) == NULL) {
 		errno = 0, error("\
 Error: cannot apply stylesheet");
 		return -1;
@@ -288,6 +291,20 @@ main(int argc, char *argv[])
 Error: STYLESHEET argument is mandatory.  See --help");
 		rc = 1;
 		goto out;
+	}
+
+	for (size_t i = 0U; i < argi->param_nargs; i++) {
+		char *p;
+
+		if ((p = strchr(argi->param_args[i], '=')) == NULL) {
+			errno = 0, error("\
+Error: parameters should have form NAME=VALUE.");
+			rc = 1;
+			goto out;
+		}
+		*p++ = '\0';
+		params[nparams++] = argi->param_args[i];
+		params[nparams++] = p;
 	}
 
 	/* here we go */
