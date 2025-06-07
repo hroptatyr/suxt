@@ -192,7 +192,7 @@ static ssize_t
 proc_buf(xmlParserCtxtPtr ptx, const char *bp, const char *const ep)
 {
 /* process buffer BP and return the number of unconsumed bytes */
-	static const char pi[] = "<?xml version=\"1.0\"?>";
+	static const char pi[] = "<?xml version=\"1.0\"";
 
 	if (ep == NULL) {
 		push_buf(ptx, bp, strlenof(pi), 1);
